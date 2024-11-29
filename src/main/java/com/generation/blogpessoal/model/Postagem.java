@@ -26,7 +26,7 @@ public class Postagem {
 	@Size(min = 10, max = 1000, message = "O atributo texto deve conter no minimo 10 e no máximo 1000 caracteres")
 	private String texto;
 	
-	@UpdateTimestamp
+	@UpdateTimestamp 
 	private LocalDate data;
 	
 
