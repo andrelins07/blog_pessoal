@@ -1,7 +1,7 @@
 package com.generation.blogpessoal.service;
 
+import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +27,15 @@ public class UsuarioService {
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
+	public List<Usuario> listarTodosUsuarios() {
+		return usuarioRepository.findAll();
+	}
+
+	public Optional<Usuario> buscarUsuarioPorId(Long id) {
+
+		return usuarioRepository.findById(id);
+	}
+
 	public Optional<Usuario> cadastrarUsuario(Usuario usuario) {
 
 		if (usuarioRepository.findByUsuario(usuario.getUsuario()).isPresent())
@@ -35,7 +44,6 @@ public class UsuarioService {
 		usuario.setSenha(criptografarSenha(usuario.getSenha()));
 
 		return Optional.of(usuarioRepository.save(usuario));
-
 	}
 
 	public Optional<Usuario> atualizarUsuario(Usuario usuario) {
@@ -50,47 +58,34 @@ public class UsuarioService {
 			usuario.setSenha(criptografarSenha(usuario.getSenha()));
 
 			return Optional.ofNullable(usuarioRepository.save(usuario));
-
 		}
-
 		return Optional.empty();
-
 	}
 
 	public Optional<UsuarioLogin> autenticarUsuario(Optional<UsuarioLogin> usuarioLogin) {
 
-		// Gera o Objeto de autenticação
 		var credenciais = new UsernamePasswordAuthenticationToken(usuarioLogin.get().getUsuario(),
 				usuarioLogin.get().getSenha());
 
-		// Autentica o Usuario
 		Authentication authentication = authenticationManager.authenticate(credenciais);
 
-		// Se a autenticação foi efetuada com sucesso
 		if (authentication.isAuthenticated()) {
 
-			// Busca os dados do usuário
 			Optional<Usuario> usuario = usuarioRepository.findByUsuario(usuarioLogin.get().getUsuario());
 
-			// Se o usuário foi encontrado
 			if (usuario.isPresent()) {
 
-				// Preenche o Objeto usuarioLogin com os dados encontrados
 				usuarioLogin.get().setId(usuario.get().getId());
 				usuarioLogin.get().setNome(usuario.get().getNome());
 				usuarioLogin.get().setFoto(usuario.get().getFoto());
 				usuarioLogin.get().setToken(gerarToken(usuarioLogin.get().getUsuario()));
 				usuarioLogin.get().setSenha("");
 
-				// Retorna o Objeto preenchido
 				return usuarioLogin;
 
 			}
-
 		}
-
 		return Optional.empty();
-
 	}
 
 	private String criptografarSenha(String senha) {
